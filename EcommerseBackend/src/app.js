@@ -25,7 +25,13 @@ import sellerRouter from './routes/seller.routes.js'
 app.use("/users", userRouter)
 app.use("/sellers", sellerRouter)
 
-
+//user side authentication
 //http://localhost:8000/users/register
+//http://localhost:8000/users/register
+//http://localhost:3000/users/logout
+
+//seller side authentication
+//http://localhost:8000/sellers/registerSeller
+//http://localhost:8000/sellers/loginSeller
 
 export { app }

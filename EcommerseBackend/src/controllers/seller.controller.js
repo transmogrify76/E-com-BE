@@ -69,7 +69,7 @@ const loginSeller = asyncHandler(async (req,res) => {
         //password check
     const isPasswordValid = await seller.isPasswordCorrect(password)
     if (!isPasswordValid) {
-        throw new ApiError(401,"invalid user credentials")
+        throw new ApiError(401,"invalid seller credentials")
     }
     console.log(seller._)
     const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(seller._id)
@@ -97,8 +97,33 @@ const loginSeller = asyncHandler(async (req,res) => {
     )
 })
 
+const logoutSeller = asyncHandler(async(req, res)=> {
+    await Seller.findByIdAndUpdate(
+        req.seller._id,
+        {
+            $set: {
+                refreshToken : undefined
+            }
+        },
+        {
+            new : true
+        }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res
+    .status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
+    .json(new ApiResponse(200,{}, "Seller logged out"))
+})
+
 
 export {
     registerSeller,
-    loginSeller
+    loginSeller,
+    logoutSeller
 }
