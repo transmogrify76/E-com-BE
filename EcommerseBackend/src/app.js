@@ -17,6 +17,7 @@ app.use(cookieParser())
 //routes
 import userRouter from './routes/user.routes.js'
 import sellerRouter from './routes/seller.routes.js'
+import AdminRouter from './routes/admin.routes.js'
 
 
 
@@ -24,6 +25,7 @@ import sellerRouter from './routes/seller.routes.js'
 //routes declaration
 app.use("/users", userRouter)
 app.use("/sellers", sellerRouter)
+app.use("/admins", AdminRouter)
 
 //user side authentication
 //http://localhost:8000/users/register

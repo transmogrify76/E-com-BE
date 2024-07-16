@@ -28,6 +28,9 @@ const sellerSchema = new Schema({
     companydescription : {
         type : String,
     },
+    role: {
+        type : String
+    },
     refreshToken: {
         type:String
     }
@@ -52,7 +55,8 @@ sellerSchema.methods.generateAccessToken = function(){
             contactperson:this.contactperson,
             companyaddress:this.companyaddress,
             companydescription: this.companydescription,
-            phoneNo:this.phoneNo
+            phoneNo:this.phoneNo,
+            role : this.role
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -69,7 +73,8 @@ sellerSchema.methods.generateRefreshToken = function(){
             contactperson:this.contactperson,
             companyaddress:this.companyaddress,
             companydescription: this.companydescription,
-            phoneNo:this.phoneNo
+            phoneNo:this.phoneNo,
+            role : this.role
         },
         process.env.ACCESS_TOKEN_SECRET,
         {

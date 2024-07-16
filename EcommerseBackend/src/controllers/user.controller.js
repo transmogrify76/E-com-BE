@@ -5,11 +5,11 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 
 const registerUser = asyncHandler(async (req, res) => {
   // GET USER DETAILS FROM FRONTEND
-    const {username,email,password,fullname,address,phoneNo } = req.body
+    const {username,email,password,fullname,address,phoneNo,role } = req.body
     console.log("email: ",email);
       // VALIDATIONS - NOT EMPTY
     if(
-        [username,email,password,fullname,address,phoneNo].some((field)=>field?.trim() === "")
+        [username,email,password,fullname,address,phoneNo,role].some((field)=>field?.trim() === "")
     ){
         throw new ApiError(400, "All fields are required")
     }
@@ -23,6 +23,7 @@ const registerUser = asyncHandler(async (req, res) => {
         fullname,
         address,
         phoneNo,
+        role,
      })
        // REMOVE PASSWORD AND REFRESH TOKEN FIELD FROM RESPONSE
      const createdUser = await User.findById(user._id).select(

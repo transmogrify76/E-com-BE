@@ -1,8 +1,8 @@
 // models/User.js
 
 import mongoose , {Schema} from 'mongoose';
-import jwt from "jsonwebtoken"
-import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
     username: {
@@ -28,6 +28,9 @@ const userSchema = new Schema({
     phoneNo:{
         type:String
     },
+    role:{
+        type : String
+    },
     refreshToken: {
         type:String
     }
@@ -52,7 +55,8 @@ userSchema.methods.generateAccessToken = function(){
             username:this.username,
             fullname:this.fullname,
             address:this.address,
-            phoneNo:this.phoneNo
+            phoneNo:this.phoneNo,
+            role:this.role
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -68,7 +72,8 @@ userSchema.methods.generateRefreshToken = function(){
             username:this.username,
             fullname:this.fullname,
             address:this.address,
-            phoneNo:this.phoneNo
+            phoneNo:this.phoneNo,
+            role : this.role
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
