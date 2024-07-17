@@ -67,18 +67,11 @@ sellerSchema.methods.generateAccessToken = function(){
 sellerSchema.methods.generateRefreshToken = function(){
     return jwt.sign(
         {
-            _id: this._id,
-            email:this.email,
-            companyname:this.companyname,
-            contactperson:this.contactperson,
-            companyaddress:this.companyaddress,
-            companydescription: this.companydescription,
-            phoneNo:this.phoneNo,
-            role : this.role
+            _id: this._id
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
     )
 }

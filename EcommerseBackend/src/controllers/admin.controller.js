@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import {Admin} from "../models/e-commerce/admin.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from 'jsonwebtoken'
 
 const registerAdmin = asyncHandler (async (req,res) => {
     const {username,email,password,fullname,phoneNo,role} = req.body
@@ -115,10 +116,58 @@ const generateAccessAndRefreshTokens = async(adminId) =>{
         .clearCookie("refreshToken",options)
         .json(new ApiResponse(200,{}, "Admin logged out"))
     })
-    
+    const refreshAccesToken = asyncHandler(async (req,res) =>{
+        const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+     
+         console.log(incomingRefreshToken)
+        if (!incomingRefreshToken){
+         throw new ApiError(401, "unauthorized request")
+        }
+     
+        try {
+         const decodedToken = jwt.verify(
+             incomingRefreshToken,
+             process.env.REFRESH_TOKEN_SECRET
+            )
+            console.log(decodedToken)
+            const admin = await Admin.findById(decodedToken?._id)
+            console.log(admin.refreshToken)
+            if (!admin){
+             throw new ApiError(401,"Invalid refresh token")
+            }
+         
+            if (incomingRefreshToken !== admin?.refreshToken){
+             throw new ApiError(401,"Refresh token is expired or used")
+            }
+         
+            const options = {
+             httpOnly : true,
+             secure: true
+            }
+             const {accessToken,newRefreshToken} = await generateAccessAndRefreshTokens(admin._id)
+         
+            return res
+            .status(200)
+            .cookie("accessToken", accessToken , options)
+            .cookie("refreshToken", newRefreshToken , options)
+            .json(
+                 new ApiResponse(
+                     200,
+                     {accessToken, refreshToken: newRefreshToken },
+                     "Access token refreshed"
+                 )
+            )
+         
+         
+        } catch (error) {
+             throw new ApiError(401, error?.message || "invalid refresh token")
+        }
+     })
+     
     
     export {
         registerAdmin,
         loginAdmin,
-        logoutAdmin
+        logoutAdmin,
+        refreshAccesToken
     }

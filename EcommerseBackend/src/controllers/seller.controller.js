@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import {Seller} from "../models/e-commerce/seller.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from 'jsonwebtoken'
 
 const registerSeller = asyncHandler (async (req,res) => {
     //get seller details from frotend
@@ -31,7 +32,7 @@ const registerSeller = asyncHandler (async (req,res) => {
              )
           // CHECK FOR Seller CREATION
              if (!createdSeller){
-                throw new ApiError (500, 'something went wrong while registering user')
+                throw new ApiError (500, 'something went wrong while registering seller')
              }
           // RETURN RES
              return res.status(201).json(
@@ -121,9 +122,58 @@ const logoutSeller = asyncHandler(async(req, res)=> {
     .json(new ApiResponse(200,{}, "Seller logged out"))
 })
 
+const refreshAccesToken = asyncHandler(async (req,res) =>{
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+ 
+     console.log(incomingRefreshToken)
+    if (!incomingRefreshToken){
+     throw new ApiError(401, "unauthorized request")
+    }
+ 
+    try {
+     const decodedToken = jwt.verify(
+         incomingRefreshToken,
+         process.env.REFRESH_TOKEN_SECRET
+        )
+        console.log(decodedToken)
+        const seller = await Seller.findById(decodedToken?._id)
+        console.log(seller.refreshToken)
+        if (!seller){
+         throw new ApiError(401,"Invalid refresh token")
+        }
+     
+        if (incomingRefreshToken !== seller?.refreshToken){
+         throw new ApiError(401,"Refresh token is expired or used")
+        }
+     
+        const options = {
+         httpOnly : true,
+         secure: true
+        }
+         const {accessToken,newRefreshToken} = await generateAccessAndRefreshTokens(seller._id)
+     
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken , options)
+        .cookie("refreshToken", newRefreshToken , options)
+        .json(
+             new ApiResponse(
+                 200,
+                 {accessToken, refreshToken: newRefreshToken },
+                 "Access token refreshed"
+             )
+        )
+     
+     
+    } catch (error) {
+         throw new ApiError(401, error?.message || "invalid refresh token")
+    }
+ })
+ 
 
 export {
     registerSeller,
     loginSeller,
-    logoutSeller
+    logoutSeller,
+    refreshAccesToken
 }

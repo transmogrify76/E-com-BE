@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 
 const adminSchema = new mongoose.Schema({
     username: {
@@ -63,17 +63,11 @@ adminSchema.methods.generateAccessToken = function(){
 adminSchema.methods.generateRefreshToken = function(){
     return jwt.sign(
         {
-            _id:this._id,
-            username:this.username,
-            password:this.password,
-            email:this.email,
-            fullname:this.fullname,
-            phoneNo:this.phoneNo,
-            role:this.role
+            _id:this._id
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
     )
 }
