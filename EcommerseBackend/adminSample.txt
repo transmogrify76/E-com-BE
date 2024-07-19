@@ -1,0 +1,36 @@
+http://localhost:3000/admins/registerAdmin
+
+{
+ "username":"test3",
+ "email":"test3@gmail.com",
+ "password":"test",
+ "fullname":"test3",
+ "phoneNo":"4569874",
+ "role":"admn"
+  
+}
+
+http://localhost:3000/admins/loginAdmin
+
+{
+ "email":"test3@gmail.com",
+ "password":"test" 
+}
+
+http://localhost:3000/admins/refresh-token
+
+{
+
+ "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Njk4ZTVkZGNjYjE1ZDhjMmYxMGUyZTEiLCJpYXQiOjE3MjEyOTY0MjEsImV4cCI6MTcyMjE2MDQyMX0.Gjphd-Um1jxQcpLj11Li2AgLySWKW71d35rOcWh5QJw"
+  
+}
+
+http://localhost:3000/admins/forgot-password-admin
+
+{
+
+ "email":"test3@gmail.com"
+  
+}
+
+http://localhost:3000/admins/logoutAdmin

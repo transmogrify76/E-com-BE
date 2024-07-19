@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { DB_NAME } from "../contants.js";
 
 // MongoDB URI and port
-const MONGODB_URI = "mongodb+srv://eshaghosal21:Tgpl2024@cluster0.ca0hohn.mongodb.net";
+const MONGODB_URI = "mongodb+srv://transmogrify07:Tgpl2024@cluster0.etutn4k.mongodb.net";
 
 const PORT = 3000;
 

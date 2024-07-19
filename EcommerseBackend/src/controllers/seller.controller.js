@@ -3,14 +3,16 @@ import { ApiError } from "../utils/ApiError.js";
 import {Seller} from "../models/e-commerce/seller.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from 'jsonwebtoken'
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 const registerSeller = asyncHandler (async (req,res) => {
     //get seller details from frotend
-    const {email,password,companyname,contactperson,phoneno,companyaddress,companydescription} = req.body
+    const {email,password,companyname,contactperson,phoneno,companyaddress,companydescription,role} = req.body
     console.log("email: ",email);
       // VALIDATIONS - NOT EMPTY
     if(
-        [email,password,companyname,contactperson,phoneno,companyaddress,companydescription].some((field)=>field?.trim() === "")
+        [email,password,companyname,contactperson,phoneno,companyaddress,companydescription,role].some((field)=>field?.trim() === "")
     ){
         throw new ApiError(400, "All fields are required")
     }
@@ -24,7 +26,8 @@ const registerSeller = asyncHandler (async (req,res) => {
         contactperson,
         phoneno,
         companyaddress,
-        companydescription
+        companydescription,
+        role
      })
             // REMOVE PASSWORD AND REFRESH TOKEN FIELD FROM RESPONSE
             const createdSeller = await Seller.findById(seller._id).select(
@@ -32,7 +35,7 @@ const registerSeller = asyncHandler (async (req,res) => {
              )
           // CHECK FOR Seller CREATION
              if (!createdSeller){
-                throw new ApiError (500, 'something went wrong while registering seller')
+                throw new ApiError (500, 'something went wrong while registering user')
              }
           // RETURN RES
              return res.status(201).json(
@@ -56,9 +59,12 @@ const generateAccessAndRefreshTokens = async(sellerId) => {
                 throw new ApiError(500,"something went wrong while generating token")
         }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const loginSeller = asyncHandler(async (req,res) => {
-    const {email,password} = req.body
-    if (!email || !password){
+    const {email,password , role} = req.body
+    if (!email || !password || !role){
         throw new ApiError(400,"email or password is required")
     }
     const seller = await Seller.findOne({
@@ -71,6 +77,9 @@ const loginSeller = asyncHandler(async (req,res) => {
     const isPasswordValid = await seller.isPasswordCorrect(password)
     if (!isPasswordValid) {
         throw new ApiError(401,"invalid seller credentials")
+    }
+    if (seller.role !== role) {
+        throw new ApiError(403, "Role does not match");
     }
     console.log(seller._)
     const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(seller._id)
@@ -98,6 +107,8 @@ const loginSeller = asyncHandler(async (req,res) => {
     )
 })
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const logoutSeller = asyncHandler(async(req, res)=> {
     await Seller.findByIdAndUpdate(
         req.seller._id,
@@ -121,6 +132,8 @@ const logoutSeller = asyncHandler(async(req, res)=> {
     .clearCookie("refreshToken",options)
     .json(new ApiResponse(200,{}, "Seller logged out"))
 })
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const refreshAccesToken = asyncHandler(async (req,res) =>{
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
@@ -169,11 +182,63 @@ const refreshAccesToken = asyncHandler(async (req,res) =>{
          throw new ApiError(401, error?.message || "invalid refresh token")
     }
  })
+
+ ////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
+ const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'eshaghosal2000@gmail.com',
+        pass: 'ylzs okas zwwf iepk'
+    }
+});
+
+// Forgot Password - Generate token and send email
+const forgotPasswordSeller = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const seller = await Seller.findOne({ email });
+
+        if (!seller) {
+            throw new ApiError(404, 'Seller not found');
+        }
+
+        // Generate reset token
+        const token = crypto.randomBytes(20).toString('hex');
+        seller.resetToken = token;
+        seller.resetTokenExpiration = Date.now() + 3600000; // 1 hour
+        await seller.save();
+
+        // Send email
+        const mailOptions = {
+            from: 'eshaghosal2000@gmail.com',
+            to: email,
+            subject: 'Password Reset Request',
+            html: `<p>You requested a password reset</p>
+                   <p>Click <a href="http://localhost:3000/reset/${token}">here</a> to reset your password.</p>`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('hiiiiiiiiii');
+                console.log(error);
+                // throw new ApiError(500, 'Failed to send email');
+            }
+            // console.log('Email sent: ' + info.response);
+            res.status(200).json(new ApiResponse(200, {}, 'Password reset email sent'));
+        });
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'Server error');
+    }
+});
+
 
 export {
     registerSeller,
     loginSeller,
     logoutSeller,
-    refreshAccesToken
+    refreshAccesToken,
+    forgotPasswordSeller 
 }

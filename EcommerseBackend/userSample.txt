@@ -1,0 +1,33 @@
+http://localhost:3000/users/register
+
+{
+    "username":"test1",
+    "email":"transmogrify07@outlook.com",
+    "password":"test",
+    "fullname":"test",
+    "address":"rdjhfgsahvffjhgfy",
+    "phoneNo":"123456",
+    "role":"user"
+}
+
+http://localhost:3000/users/login
+
+{
+    "username":"test1",
+    "password":"test",
+    "role":"user"
+}
+
+http://localhost:3000/users/refresh-token
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Njk4ZTI0N2NjYjE1ZDhjMmYxMGUyYzQiLCJpYXQiOjE3MjEyOTU1NDEsImV4cCI6MTcyMjE1OTU0MX0.llGswrXPzGaBmeaLcfS0_50VaVURe_OaCNfCLPQ21h4"
+}
+
+http://localhost:3000/users/logout
+
+http://localhost:3000/users/forgot-password
+
+{
+  "email":"transmogrify07@outlook.com"
+}
+

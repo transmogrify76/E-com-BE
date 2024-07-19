@@ -1,0 +1,37 @@
+http://localhost:3000/sellers/registerSeller
+
+{
+  "email":"test2@gmail.com",
+  "password":"test",
+  "companyname":"test",
+  "contactperson":"test",
+  "phoneno":"654987000",
+  "companyaddress":"tgbujnfggjkkl",
+  "companydescription":"efgwuefrgfruyreefhgreuf fhdgfgjfi",
+  "role":"seller"
+}
+
+http://localhost:3000/sellers/loginSeller
+
+{
+  "email":"test2@gmail.com",
+  "password":"test",
+  "role" : "seller"
+  
+}
+
+http://localhost:3000/sellers/forgot-password-seller
+
+{
+  "email":"test2@gmail.com"
+  
+}
+
+http://localhost:3000/sellers/logoutSeller
+
+http://localhost:3000/sellers/refresh-token
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Njk4ZTQ0Y2NjYjE1ZDhjMmYxMGUyZDMiLCJpYXQiOjE3MjEyOTU5OTgsImV4cCI6MTcyMjE1OTk5OH0.3_FRYqqw6NKwiFRqdQZooRi901tGRkIuOGvMsFmuDvU"
+  
+}

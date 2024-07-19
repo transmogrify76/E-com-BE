@@ -3,6 +3,9 @@ import {ApiError} from "../utils/ApiError.js"
 import {User} from "../models/e-commerce/user.js"
 import { ApiResponse } from '../utils/ApiResponse.js';
 import jwt from "jsonwebtoken"
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import { log } from 'console';
 
 const registerUser = asyncHandler(async (req, res) => {
   // GET USER DETAILS FROM FRONTEND
@@ -42,6 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
+
     //access and refresh token
 const generateAccessAndRefreshTokens = async(userId) => {
     try{
@@ -60,13 +64,16 @@ const generateAccessAndRefreshTokens = async(userId) => {
         throw new ApiError(500,"something went wrong while generating token")
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // req body --> data
 const loginUser = asyncHandler(async (req,res)=> {
 
 //username or email
-    const {username,password} = req.body
-    if (!username || !password){
-        throw new ApiError(400,"username or password is required")
+    const {username,password,role} = req.body
+    if (!username || !password ||!role){
+        throw new ApiError(400,"username or password or role is required")
     }
     
     //find the user
@@ -82,6 +89,9 @@ const loginUser = asyncHandler(async (req,res)=> {
     const isPasswordValid = await user.isPasswordCorrect(password)
     if (!isPasswordValid) {
         throw new ApiError(401,"invalid user credentials")
+    }
+    if (user.role !== role) {
+        throw new ApiError(403, "Role does not match");
     }
     console.log(user._)
     const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user._id)
@@ -109,6 +119,8 @@ const loginUser = asyncHandler(async (req,res)=> {
     )
 })
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const logoutUser = asyncHandler(async(req, res)=> {
     await User.findByIdAndUpdate(
         req.user._id,
@@ -133,57 +145,111 @@ const logoutUser = asyncHandler(async(req, res)=> {
     .json(new ApiResponse(200,{}, "User logged out"))
 })
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const refreshAccesToken = asyncHandler(async (req,res) =>{
-   const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+ 
+     console.log(incomingRefreshToken)
+    if (!incomingRefreshToken){
+     throw new ApiError(401, "unauthorized request")
+    }
+ 
+    try {
+     const decodedToken = jwt.verify(
+         incomingRefreshToken,
+         process.env.REFRESH_TOKEN_SECRET
+        )
+        console.log(decodedToken)
+        const user = await User.findById(decodedToken?._id)
+        console.log(user.refreshToken)
+        if (!user){
+         throw new ApiError(401,"Invalid refresh token")
+        }
+     
+        if (incomingRefreshToken !== user?.refreshToken){
+         throw new ApiError(401,"Refresh token is expired or used")
+        }
+     
+        const options = {
+         httpOnly : true,
+         secure: true
+        }
+         const {accessToken,newRefreshToken} = await generateAccessAndRefreshTokens(user._id)
+     
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken , options)
+        .cookie("refreshToken", newRefreshToken , options)
+        .json(
+             new ApiResponse(
+                 200,
+                 {accessToken, refreshToken: newRefreshToken },
+                 "Access token refreshed"
+             )
+        )
+     
+     
+    } catch (error) {
+         throw new ApiError(401, error?.message || "invalid refresh token")
+    }
+ })
 
-    console.log(incomingRefreshToken)
-   if (!incomingRefreshToken){
-    throw new ApiError(401, "unauthorized request")
-   }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   try {
-    const decodedToken = jwt.verify(
-        incomingRefreshToken,
-        process.env.REFRESH_TOKEN_SECRET
-       )
-       console.log(decodedToken)
-       const user = await User.findById(decodedToken?._id)
-       console.log(user.refreshToken)
-       if (!user){
-        throw new ApiError(401,"Invalid refresh token")
-       }
-    
-       if (incomingRefreshToken !== user?.refreshToken){
-        throw new ApiError(401,"Refresh token is expired or used")
-       }
-    
-       const options = {
-        httpOnly : true,
-        secure: true
-       }
-        const {accessToken,newRefreshToken} = await generateAccessAndRefreshTokens(user._id)
-    
-       return res
-       .status(200)
-       .cookie("accessToken", accessToken , options)
-       .cookie("refreshToken", newRefreshToken , options)
-       .json(
-            new ApiResponse(
-                200,
-                {accessToken, refreshToken: newRefreshToken },
-                "Access token refreshed"
-            )
-       )
-    
-    
-   } catch (error) {
-        throw new ApiError(401, error?.message || "invalid refresh token")
-   }
-})
+ const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'eshaghosal2000@gmail.com',
+        pass: 'ylzs okas zwwf iepk'
+    }
+});
+
+// Forgot Password - Generate token and send email
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            throw new ApiError(404, 'User not found');
+        }
+
+        // Generate reset token
+        const token = crypto.randomBytes(20).toString('hex');
+        user.resetToken = token;
+        user.resetTokenExpiration = Date.now() + 3600000; // 1 hour
+        await user.save();
+
+        // Send email
+        const mailOptions = {
+            from: 'eshaghosal2000@gmail.com',
+            to: email,
+            subject: 'Password Reset Request',
+            html: `<p>You requested a password reset</p>
+                   <p>Click <a href="http://localhost:3000/reset/${token}">here</a> to reset your password.</p>`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('hiiiiiiiiii');
+                console.log(error);
+                // throw new ApiError(500, 'Failed to send email');
+            }
+            // console.log('Email sent: ' + info.response);
+            res.status(200).json(new ApiResponse(200, {}, 'Password reset email sent'));
+        });
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'Server error');
+    }
+});
 
 export { 
     registerUser,
     loginUser,
     logoutUser,
-    refreshAccesToken
+    refreshAccesToken,
+    forgotPassword 
  };
