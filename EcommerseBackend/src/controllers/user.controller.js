@@ -7,6 +7,10 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { log } from 'console';
 
+
+
+
+
 const registerUser = asyncHandler(async (req, res) => {
   // GET USER DETAILS FROM FRONTEND
     const {username,email,password,fullname,address,phoneNo,role } = req.body
@@ -197,13 +201,21 @@ const refreshAccesToken = asyncHandler(async (req,res) =>{
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
- const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'eshaghosal2000@gmail.com',
-        pass: 'ylzs okas zwwf iepk'
+        pass: 'ylzs okas zwwf iepk' // Replace with your actual password or use environment variables
     }
 });
+
+// Function to generate a random PIN
+function generateRandomPIN() {
+    const pinLength = 6;
+    const pin = Math.random().toString().slice(-pinLength);
+    return pin;
+
+}
 
 // Forgot Password - Generate token and send email
 const forgotPassword = asyncHandler(async (req, res) => {
@@ -218,26 +230,29 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
         // Generate reset token
         const token = crypto.randomBytes(20).toString('hex');
-        user.resetToken = token;
+        // user.resetToken = generateRandomPIN();
         user.resetTokenExpiration = Date.now() + 3600000; // 1 hour
         await user.save();
 
+        // Generate PIN
+        const pin = generateRandomPIN();
+        req.varPin = pin;
+        console.log('pppppppppp' ,req);
         // Send email
         const mailOptions = {
             from: 'eshaghosal2000@gmail.com',
             to: email,
             subject: 'Password Reset Request',
             html: `<p>You requested a password reset</p>
-                   <p>Click <a href="http://localhost:3000/reset/${token}">here</a> to reset your password.</p>`
+                   <p>Your PIN is: <strong>${pin}</strong></p>
+                   <p>Use this PIN to reset your password.</p>`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                console.log('hiiiiiiiiii');
                 console.log(error);
-                // throw new ApiError(500, 'Failed to send email');
+                throw new ApiError(500, 'Failed to send email');
             }
-            // console.log('Email sent: ' + info.response);
             res.status(200).json(new ApiResponse(200, {}, 'Password reset email sent'));
         });
     } catch (error) {
@@ -246,10 +261,54 @@ const forgotPassword = asyncHandler(async (req, res) => {
     }
 });
 
+// Verify OTP and reset password
+const verifyOTPAndResetPassword = asyncHandler(async (req, res) => {
+    const varPin = req.varPin;
+    console.log('=========================' , varPin , req.varPin);
+    const { email, otp, newPassword } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            throw new ApiError(404, 'User not found');
+        }
+
+        // Check if OTP and reset token are valid and not expired
+        if (otp!== otp) {
+            console.log('ghghghghg',otp , varPin );
+            throw new ApiError(400, 'Invalid or expired OTssssP');
+        }
+
+        // Reset password
+        user.password = newPassword;
+        user.resetToken = undefined;
+        user.resetTokenExpiration = undefined;
+        await user.save();
+
+        // Optionally, you may want to send a confirmation email to the user here
+
+        res.status(200).json(new ApiResponse(200, {}, 'Password reset successfully'));
+    } catch (error) {
+        console.error(error);
+        if (error instanceof ApiError) {
+            res.status(error.statusCode || 500).json({
+                message: error.message
+            });
+        } else {
+            res.status(500).json({
+                message: 'Server error'
+            });
+        }
+    }
+});
+
+
 export { 
     registerUser,
     loginUser,
     logoutUser,
     refreshAccesToken,
-    forgotPassword 
+    forgotPassword,
+    verifyOTPAndResetPassword
  };

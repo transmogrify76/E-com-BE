@@ -222,6 +222,7 @@ const forgotPasswordAdmin = asyncHandler(async (req, res) => {
 
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
+                
                 console.log('hiiiiiiiiii');
                 console.log(error);
                 // throw new ApiError(500, 'Failed to send email');
