@@ -194,6 +194,14 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+// Function to generate a random PIN
+function generateRandomPIN() {
+    const pinLength = 6;
+    const pin = Math.random().toString().slice(-pinLength);
+    return pin;
+
+}
+
 // Forgot Password - Generate token and send email
 const forgotPasswordAdmin = asyncHandler(async (req, res) => {
     const { email } = req.body;
@@ -210,6 +218,9 @@ const forgotPasswordAdmin = asyncHandler(async (req, res) => {
         admin.resetToken = token;
         admin.resetTokenExpiration = Date.now() + 3600000; // 1 hour
         await admin.save();
+        const pin = generateRandomPIN();
+        req.varPin = pin;
+        console.log('pppppppppp' ,req);
 
         // Send email
         const mailOptions = {
@@ -217,7 +228,8 @@ const forgotPasswordAdmin = asyncHandler(async (req, res) => {
             to: email,
             subject: 'Password Reset Request',
             html: `<p>You requested a password reset</p>
-                   <p>Click <a href="http://localhost:3000/reset/${token}">here</a> to reset your password.</p>`
+                   <p>Your PIN is: <strong>${pin}</strong></p>
+                   <p>Use this PIN to reset your password.</p>`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -235,6 +247,48 @@ const forgotPasswordAdmin = asyncHandler(async (req, res) => {
         throw new ApiError(500, 'Server error');
     }
 });
+// Verify OTP and reset password
+const verifyOTPAndResetPasswordAdmin = asyncHandler(async (req, res) => {
+    const varPin = req.varPin;
+    console.log('=========================' , varPin , req.varPin);
+    const { email, otp, newPassword } = req.body;
+
+    try {
+        const admin = await Admin.findOne({ email });
+
+        if (!admin) {
+            throw new ApiError(404, 'admin not found');
+        }
+
+        // Check if OTP and reset token are valid and not expired
+        if (otp!== otp) {
+            console.log('ghghghghg',otp , varPin );
+            throw new ApiError(400, 'Invalid or expired OTssssP');
+        }
+
+        // Reset password
+        admin.password = newPassword;
+        admin.resetToken = undefined;
+        admin.resetTokenExpiration = undefined;
+        await admin.save();
+
+        // Optionally, you may want to send a confirmation email to the admin here
+
+        res.status(200).json(new ApiResponse(200, {}, 'Password reset successfully'));
+    } catch (error) {
+        console.error(error);
+        if (error instanceof ApiError) {
+            res.status(error.statusCode || 500).json({
+                message: error.message
+            });
+        } else {
+            res.status(500).json({
+                message: 'Server error'
+            });
+        }
+    }
+});
+
 
      
     
@@ -243,5 +297,6 @@ const forgotPasswordAdmin = asyncHandler(async (req, res) => {
         loginAdmin,
         logoutAdmin,
         refreshAccesToken,
-        forgotPasswordAdmin
+        forgotPasswordAdmin,
+        verifyOTPAndResetPasswordAdmin
     }
