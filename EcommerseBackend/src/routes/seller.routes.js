@@ -4,6 +4,7 @@ import { verifyJWT } from "../middlewares/sellerAuth.middleware.js";
 import { refreshAccesToken } from "../controllers/seller.controller.js";
 import { forgotPasswordSeller } from "../controllers/seller.controller.js";
 import { verifyOTPAndResetPasswordseller } from "../controllers/seller.controller.js";
+// import { uploadImage } from "../controllers/seller.controller.js";
 
 const router = Router()
 
@@ -13,5 +14,6 @@ router.route("/logoutSeller").post(verifyJWT , logoutSeller)
 router.route("/refresh-token").post(refreshAccesToken)
 router.route("/forgot-password-seller").post(forgotPasswordSeller)
 router.route("/verifyOTPseller").post(verifyOTPAndResetPasswordseller)
+// router.route("/uploadImage").post(uploadImage)
 
 export default router

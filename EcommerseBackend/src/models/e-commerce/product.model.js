@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
-    name: {
+    productname: {
         type: String,
         required: true
     },
@@ -10,7 +10,8 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     productImage: {
-        type: String
+        data: Buffer, // Store binary data (image) as Buffer
+        contentType: String // Mime type of the file
     },
     price: {
         type: Number,
@@ -21,19 +22,11 @@ const productSchema = new mongoose.Schema({
         default: 0
     },
     category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",  // Assuming there's a Category model defined
+        type: String,
         required: true
-    },
-    ownership: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"  // Assuming there's a User model defined
-    },
-    quantity: {
-        type: Number
     }
 }, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);
 
-export default Product;
+export {Product};

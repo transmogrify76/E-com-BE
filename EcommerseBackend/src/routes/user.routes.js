@@ -4,6 +4,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { refreshAccesToken } from "../controllers/user.controller.js";
 import { forgotPassword } from "../controllers/user.controller.js";
 import { verifyOTPAndResetPassword } from "../controllers/user.controller.js";
+import { getUserById } from "../controllers/user.controller.js";
 
 const router = Router()
 
@@ -18,6 +19,8 @@ router.route("/refresh-token").post(refreshAccesToken)
 router.route("/forgot-password").post(forgotPassword)
 
 router.route("/varifyOTP").post(verifyOTPAndResetPassword)
+
+router.route("/getUser").post(getUserById)
 
 
 export default router

@@ -7,9 +7,17 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { log } from 'console';
 
+// Function to fetch user details by ID
+const getUserById = async (userId) => {
+    try {
+        const user = await User.findById(userId).select('-password -refreshToken');
+        return user;
+    } catch (error) {
+        throw new ApiError(500, 'Error fetching user details');
+    }
+};
 
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const registerUser = asyncHandler(async (req, res) => {
   // GET USER DETAILS FROM FRONTEND
@@ -310,5 +318,6 @@ export {
     logoutUser,
     refreshAccesToken,
     forgotPassword,
-    verifyOTPAndResetPassword
+    verifyOTPAndResetPassword,
+    getUserById
  };

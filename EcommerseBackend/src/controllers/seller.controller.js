@@ -5,6 +5,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+// import multer from 'multer';
+// import {Product} from '../models/e-commerce/product.model.js';
+// import path from 'path';
 
 const registerSeller = asyncHandler (async (req,res) => {
     //get seller details from frotend
@@ -285,6 +288,60 @@ const verifyOTPAndResetPasswordseller = asyncHandler(async (req, res) => {
     }
 });
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb){
+//         cb(null, './')
+//     },
+//     filename: function (req, file, cb){
+//         cb(null,file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+//     }
+// })
+
+// const upload = multer({ storage });
+
+// // Example controller function to handle image upload
+// const uploadImage = async (req, res, next) => {
+//     try {
+//         upload.single('image')(req, res, async (err) => {
+//             if (err) {
+//                 // An error occurred with multer
+//                 console.error(err);
+//                 return next(new ApiError(500, 'Error uploading image', err));
+//             }
+
+//             // File uploaded successfully, now handle product details
+//             const { productname, description, price, stock, category } = req.body;
+
+//             // Assuming req.file contains the uploaded image details
+//             const productImage = {
+//                 data: req.file.buffer, // Accessing the file buffer
+//                 contentType: req.file.mimetype
+//             };
+
+//             try {
+//                 const newProduct = await Product.create({
+//                     productname,
+//                     description,
+//                     productImage,
+//                     price,
+//                     stock,
+//                     category
+//                 });                
+//                 res.status(201).json({ message: 'Image and product details uploaded successfully', product: newProduct });
+//             } catch (error) {
+//                 console.error(error);
+//                 next(new ApiError(500, 'Error creatinggggg product', error));
+//             }
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         next(new ApiError(500, 'Server error', error));
+//     }
+// };
+
+
 
 export {
     registerSeller,
@@ -292,5 +349,6 @@ export {
     logoutSeller,
     refreshAccesToken,
     forgotPasswordSeller ,
-    verifyOTPAndResetPasswordseller
+    verifyOTPAndResetPasswordseller,
+    // uploadImage
 }
