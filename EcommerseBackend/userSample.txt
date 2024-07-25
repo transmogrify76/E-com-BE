@@ -31,3 +31,6 @@ http://localhost:3000/users/forgot-password
   "email":"transmogrify07@outlook.com"
 }
 
+
+
+http://localhost:3000/users/_id

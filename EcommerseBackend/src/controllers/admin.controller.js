@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { log } from 'console';
+import mongoose from 'mongoose'
 
 const registerAdmin = asyncHandler (async (req,res) => {
     const {username,email,password,fullname,phoneNo,role} = req.body
@@ -289,6 +290,29 @@ const verifyOTPAndResetPasswordAdmin = asyncHandler(async (req, res) => {
     }
 });
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const getAdminById = asyncHandler(async (req, res) => {
+    const adminId = req.params.adminId;
+  
+    try {
+      if (!mongoose.Types.ObjectId.isValid(adminId)) {
+        return res.status(400).json({ message: 'Invalid admin ID' });
+      }
+  
+      const admin = await Admin.findById(adminId);
+  
+      if (!admin) {
+        return res.status(404).json({ message: 'Admin not found' });
+      }
+  
+      res.json(admin); // Send user data as JSON response
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server Error' });
+    }
+  });
+
 
      
     
@@ -298,5 +322,6 @@ const verifyOTPAndResetPasswordAdmin = asyncHandler(async (req, res) => {
         logoutAdmin,
         refreshAccesToken,
         forgotPasswordAdmin,
-        verifyOTPAndResetPasswordAdmin
+        verifyOTPAndResetPasswordAdmin,
+        getAdminById
     }

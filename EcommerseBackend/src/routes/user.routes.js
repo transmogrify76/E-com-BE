@@ -20,7 +20,7 @@ router.route("/forgot-password").post(forgotPassword)
 
 router.route("/varifyOTP").post(verifyOTPAndResetPassword)
 
-router.route("/getUser").post(getUserById)
+router.route("/:userId").get(getUserById)
 
 
 export default router

@@ -6,7 +6,7 @@ http://localhost:3000/admins/registerAdmin
  "password":"test",
  "fullname":"test3",
  "phoneNo":"4569874",
- "role":"admn"
+ "role":"admin"
   
 }
 
@@ -34,3 +34,6 @@ http://localhost:3000/admins/forgot-password-admin
 }
 
 http://localhost:3000/admins/logoutAdmin
+
+get
+http://localhost:3000/admins/:id

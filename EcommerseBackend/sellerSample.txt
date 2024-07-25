@@ -35,3 +35,7 @@ http://localhost:3000/sellers/refresh-token
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Njk4ZTQ0Y2NjYjE1ZDhjMmYxMGUyZDMiLCJpYXQiOjE3MjEyOTU5OTgsImV4cCI6MTcyMjE1OTk5OH0.3_FRYqqw6NKwiFRqdQZooRi901tGRkIuOGvMsFmuDvU"
   
 }
+
+
+get 
+http://localhost:3000/sellers/_sellerid

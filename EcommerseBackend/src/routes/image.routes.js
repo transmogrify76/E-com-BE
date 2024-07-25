@@ -6,3 +6,6 @@ const router = Router()
 router.route("/image").post(Image)
 
 export default router
+
+
+//http://localhost:3000/images/uploads
