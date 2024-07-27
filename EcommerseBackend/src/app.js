@@ -12,7 +12,7 @@ app.use(cors({
 }))
 
 // Serve Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
 app.use(express.json({limit: '16kb'}))

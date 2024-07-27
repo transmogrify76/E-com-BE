@@ -5,11 +5,11 @@ const doc = {
         title: 'My API',
         description: 'API documentation',
     },
-    host: 'localhost:3000', // Change this to your server's host and port
+    host: 'localhost:3000', 
     schemes: ['http'],
 };
 
-const outputFile = './src/swagger-output.json'; // Place the output file in the src directory
-const endpointsFiles = ['./src/app.js']; // Point to the src directory
+const outputFile = './src/swagger-output.json'; 
+const endpointsFiles = ['./src/app.js']; 
 
 swaggerAutogen()(outputFile, endpointsFiles, doc);
